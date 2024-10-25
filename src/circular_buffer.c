@@ -2,182 +2,111 @@
 #include <limits.h>
 #include "circular_buffer.h"
 
-
-
 void initCircularBuffer(struct circularBuffer* bufferPtr, int* data, int maxLength) {
-  bufferPtr->data = data;
-  bufferPtr->head = 0;
-  bufferPtr->tail = 0;
-  bufferPtr->maxLength = maxLength;
-  bufferPtr->numData = 0; // empty size at beginning
+    bufferPtr->data = data;
+    bufferPtr->head = 0;
+    bufferPtr->tail = 0;
+    bufferPtr->maxLength = maxLength;
+    bufferPtr->numData = 0;
 }
 
-  inline int positive_modulo(int i, int n) {
+inline int positive_modulo(int i, int n) {
     return (i % n + n) % n;
 }
 
+int isEmpty(struct circularBuffer* bufferPtr) {
+    return bufferPtr->numData == 0;
+}
 
-int isEmpty(struct circularBuffer* bufferPtr){
-  if(bufferPtr->numData == 0){
-      return 1;
-    } else{
-      return 0;
-  }
-  
-  }
+int isFull(struct circularBuffer* bufferPtr) {
+    return bufferPtr->numData == bufferPtr->maxLength;
+}
 
-int isFull(struct circularBuffer* bufferPtr){
-    if(bufferPtr-> numData == bufferPtr->maxLength)
-    {
-      return 1;
-    } else{
-      return 0;
+int addElement(struct circularBuffer* bufferPtr, int value) {
+    if (isFull(bufferPtr)) {
+        return INT_MIN;
     }
-  }
-
-int addElement(struct circularBuffer* bufferPtr, int value){
-  if(isFull(bufferPtr)){
-      return INT_MIN;
-  }  
-  bufferPtr->data[bufferPtr->tail] = value;
-  bufferPtr->numData++;
-  bufferPtr->tail = positive_modulo(bufferPtr->tail-1, bufferPtr->maxLength);
-  return value;
-}
-
-int removeHead(struct circularBuffer* bufferPtr){
-  int removedValue;
-  if(isEmpty(bufferPtr)){
-    return INT_MIN;
-  }
-  removedValue = bufferPtr->data[bufferPtr->head];
-  bufferPtr->numData--;
-  bufferPtr->head = positive_modulo(bufferPtr->head - 1, bufferPtr->maxLength);
-
-  return removedValue;
-}
-
-
-int contains(struct circularBuffer* bufferPtr, int value){
-  int index = bufferPtr->tail;
-  int valueFound;
-  if (isEmpty(bufferPtr))
-  {
-    return INT_MIN;
-  }
-  for(int i = 0; i<bufferPtr->maxLength; i++){
-      if(bufferPtr->data[index] == value){
-        valueFound = 1;
-      } 
-    index = (index + 1 ) % bufferPtr->maxLength;
-  }
-  if(valueFound == 1){
+    
+    bufferPtr->data[bufferPtr->tail] = value;
+    bufferPtr->tail = (bufferPtr->tail + 1) % bufferPtr->maxLength;  // Increment tail
+    bufferPtr->numData++;
     return value;
-  } else{
-  return INT_MIN;
-  }
-
 }
 
-int removeValue(struct circularBuffer* bufferPtr, int value){
- // int index = bufferPtr->tail;
-  //int temp;
-  //int count = bufferPtr->numData;
-  //int removedValue;
-  //int replacement = 77;
-  //int valueRemoved;
-  int index, nextIndex;
-  int valueRemoved = 0; // Initially, no value is removed.
-  int count = bufferPtr->numData; // Number of elements to check.
+int removeHead(struct circularBuffer* bufferPtr) {
+    if (isEmpty(bufferPtr)) {
+        return INT_MIN;
+    }
+    
+    int removedValue = bufferPtr->data[bufferPtr->head];
+    bufferPtr->head = (bufferPtr->head + 1) % bufferPtr->maxLength;  // Increment head
+    bufferPtr->numData--;
+    return removedValue;
+}
 
-  if(isEmpty(bufferPtr)){
-    return INT_MIN;
-  }
-
-
-
-    for(int i = 0; i < count; i++){
-        index = (bufferPtr->head + i) % bufferPtr->maxLength; // Calculate current index in a circular manner.
-        if(bufferPtr->data[index] == value){
-            // Shift all subsequent elements one position towards the head.
-            for(int j = i; j < count - 1; j++){
-                nextIndex = (bufferPtr->head + j) % bufferPtr->maxLength;
-                int nextIndexPlusOne = (bufferPtr->head + j + 1) % bufferPtr->maxLength;
-                bufferPtr->data[nextIndex] = bufferPtr->data[nextIndexPlusOne];
-            }
-            bufferPtr->numData--; // Decrease the number of data elements.
-            bufferPtr->tail = (bufferPtr->tail - 1 + bufferPtr->maxLength) % bufferPtr->maxLength; // Update the tail position in a circular manner.
-            valueRemoved = 1; // Mark that a value has been removed.
-            i--; // Adjust loop index since we've removed an element.
-            count--; // Decrease count since the total number of elements has decreased.
+int contains(struct circularBuffer* bufferPtr, int value) {
+    if (isEmpty(bufferPtr)) {
+        return INT_MIN;
+    }
+    
+    int count = bufferPtr->numData;
+    for (int i = 0; i < count; i++) {
+        int index = (bufferPtr->head + i) % bufferPtr->maxLength;
+        if (bufferPtr->data[index] == value) {
+            return value;
         }
     }
-  
-  /*for(int i = 0; i<bufferPtr->maxLength; i++){
-    if(bufferPtr->data[index] == value){
-      removedValue = bufferPtr->data[index];
-      bufferPtr->numData--;
-      valueRemoved = 1;
-      for(int y = 0; y<bufferPtr->maxLength; y++){
-        bufferPtr->data[index] = bufferPtr->data[i+1];
-      }
-    bufferPtr->tail = positive_modulo(bufferPtr->tail-1,bufferPtr->maxLength) ;
-
-    }
-    index = positive_modulo(index - 1, bufferPtr->maxLength);
-
-  }
- */
-
-  /*
-  for(int i = 0; i<bufferPtr->maxLength; i++){
-    if(bufferPtr->data[index] == value){
-      removedValue = bufferPtr->data[index];
-
-      bufferPtr->data[index] = bufferPtr->data[index+1];
-      //bufferPtr->data[index+1] = replacement;
-      valueRemoved = 1;
-      bufferPtr->numData--;
-      bufferPtr->tail = positive_modulo(bufferPtr->tail-1,bufferPtr->maxLength) ;
-
-    }
-    index = positive_modulo(index - 1, bufferPtr->maxLength);
-  }*/
-  if(valueRemoved == 1){
-      return value;
-    }else{
-      return INT_MIN;
-    }
-
+    return INT_MIN;
 }
-/*void printBuffer(struct circularBuffer* bufferPtr) {
-    if (bufferPtr->numData == 0) {
-        printf("Buffer is empty.\n");
+
+int removeValue(struct circularBuffer* bufferPtr, int value) {
+    if (isEmpty(bufferPtr)) {
+        return INT_MIN;
+    }
+
+    int valueFound = 0;
+    int writeIndex = bufferPtr->head;
+    int readIndex = bufferPtr->head;
+    int count = bufferPtr->numData;
+
+    // Scan through all elements
+    for (int i = 0; i < count; i++) {
+        readIndex = (bufferPtr->head + i) % bufferPtr->maxLength;
+        
+        if (bufferPtr->data[readIndex] != value) {
+            // Keep this element
+            if (writeIndex != readIndex) {
+                bufferPtr->data[writeIndex] = bufferPtr->data[readIndex];
+            }
+            writeIndex = (writeIndex + 1) % bufferPtr->maxLength;
+        } else {
+            valueFound = 1;
+            bufferPtr->numData--;
+        }
+    }
+
+    // Update tail to point to the next empty position
+    if (bufferPtr->numData > 0) {
+        bufferPtr->tail = (bufferPtr->head + bufferPtr->numData) % bufferPtr->maxLength;
+    } else {
+        bufferPtr->head = bufferPtr->tail = 0;
+    }
+
+    return valueFound ? value : INT_MIN;
+}
+
+void printBuffer(struct circularBuffer* bufferPtr) {
+    if (isEmpty(bufferPtr)) {
+        printf("Buffer is empty\n");
         return;
     }
-
-    printf("Buffer contents: ");
-    int i = bufferPtr->head;
-    do {
-        printf("%d ", bufferPtr->data[i]);
-        i = (i + 1) % bufferPtr->maxLength; 
-    } while (i != bufferPtr->tail);
+    
+    printf("Head: %d, Tail: %d, Count: %d\nValues: ", 
+           bufferPtr->head, bufferPtr->tail, bufferPtr->numData);
+           
+    for (int i = 0; i < bufferPtr->numData; i++) {
+        int index = (bufferPtr->head + i) % bufferPtr->maxLength;
+        printf("%d ", bufferPtr->data[index]);
+    }
     printf("\n");
 }
-*/
-
-void printBuffer(struct circularBuffer* bufferPtr){
-  //int index = bufferPtr->tail;
-  printf("dis da tail %d ", bufferPtr->tail );
-  printf("dis da head %d ", bufferPtr->head );
-  for(int i = 0; i < bufferPtr->numData; i++){
-    printf("Value is %d\n ", bufferPtr->data[positive_modulo(bufferPtr->head-i,bufferPtr->maxLength)]);
-    
-   // index = (index + 1) % bufferPtr -> maxLength;
-  } printf("\n");
-}
-
-
-
-
-

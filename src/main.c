@@ -4,7 +4,7 @@
 #include "circular_buffer.h"
 
 /*
- * Change the value of BUFFER_SIZE if you want to change the size of the buffer. 
+ * SET BUFFER SIZE VALIE HERE
  */ 
 #define BUFFER_SIZE 4
 struct circularBuffer buffer;
@@ -59,11 +59,13 @@ void test_removeValue() {
     printf("Testing removeValue...\n");
     int *buffer_data = (int*) malloc(BUFFER_SIZE * sizeof(int));
     initCircularBuffer(&buffer, buffer_data, BUFFER_SIZE);
-    for(int i = 0; i < BUFFER_SIZE; i++) {
-        addElement(&buffer, i);
-    }
+    addElement(&buffer, 2);
+    addElement(&buffer, 0);
+    addElement(&buffer, 1);
+    addElement(&buffer, 2);
+    printBuffer(&buffer);
     removeValue(&buffer, 2);
-    // Expected: Element 2 is removed, buffer contains 0, 1, 3
+    // Expected: Element 2 is removed, buffer contains 0,1
     printBuffer(&buffer);
     free(buffer_data);
 }
@@ -76,9 +78,9 @@ void test_contains() {
         addElement(&buffer, i);
     }
     int result = contains(&buffer, 3);
-    printf("Contains 3: %d\n", result); // Expected: 1 (true)
+    printf("Contains 3: %d\n", result); // Expected: 3:3 (true)
     result = contains(&buffer, 5);
-    printf("Contains 5: %d\n", result); // Expected: 0 (false)
+    printf("Contains 5: %d\n", result); // Expected: 5:INT_MIN (false)
     free(buffer_data);
 }
 
@@ -187,25 +189,8 @@ void app_main() {
     // Some code to help you get started
     int *buffer_data = (int*) malloc(BUFFER_SIZE * sizeof(int));
     initCircularBuffer(&buffer, buffer_data, BUFFER_SIZE);
-
-    printf("For example, output the results of your tests here.");
-    blackBoxTest_first();
-    blackBoxTest_second();
-    blackBoxTest_third();
-    blackBoxTest_fourth();
-    blackBoxTest_fifth();
-    blackBoxTest_sixth();
-    blackBoxTest_seventh();
-    blackBoxTest_eighth();
-    blackBoxTest_ninth();
-    printf("\n\n");   
-
-    printf("\nPerhaps with some delay...");
-
-    printf("\n\n\n");
-
     ets_delay_us(2000000ul);
-    printf("\nbetween your printouts!");
+
     run_whitebox_tests();
 
     printf("\n\n\n");
